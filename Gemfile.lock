@@ -1,0 +1,20 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    dream_cheeky (0.3.1)
+      pkg-config
+    go_api_client (0.5.4)
+      nokogiri
+    mini_portile (0.6.0)
+    nokogiri (1.6.2.1)
+      mini_portile (= 0.6.0)
+    os (0.9.6)
+    pkg-config (1.1.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  dream_cheeky
+  go_api_client
+  os
