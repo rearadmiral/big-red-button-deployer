@@ -11,7 +11,7 @@ require 'httparty'
 puts "finding button..."
 
 username = ENV['USERNAME'] || raise("Please specify env variable USERNAME")
-host = ENV['GO_HOST'] || raiise("Please specifiy env variable GO_HOST")
+host = ENV['GO_HOST'] || raise("Please specifiy env variable GO_HOST")
 pipeline = ENV['PIPELINE'] || raise("Please specify env variable PIPELINE")
 
 password = ask("enter go password for #{username}: ") { |prompt| prompt.echo = false }
