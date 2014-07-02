@@ -4,7 +4,6 @@ require 'bundler'
 Bundler.setup
 
 require 'dream_cheeky'
-require 'os'
 require 'highline/import'
 require 'httparty'
 
@@ -32,7 +31,10 @@ puts "Success!"
 
 puts "Test request succeeded."
 
-class BaseHandler
+class Handler
+  def open
+    `open dive_horn.mp3`
+  end
 
   def push
     r = HTTParty.post(SCHEDULE_PIPELINE_URL, AUTH_OPTIONS)
@@ -45,29 +47,11 @@ class BaseHandler
     end
   end
 
-end
-
-class WindowsHandler < BaseHandler
-
-  def open
-
-  end
-
-  def close
-  end
-
-end
-
-class OsxHandler < BaseHandler
-  def open
-    `open dive_horn.mp3`
-  end
-
   def close
   end
 end
 
-handler = OS.windows? ? WindowsHandler.new : OsxHandler.new
+handler = Handler.new
 
 DreamCheeky::BigRedButton.run do
 

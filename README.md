@@ -1,6 +1,7 @@
 Go Deploy with Big Red Button
 =============================
 
+I only have this working on OSX for now.  Attempts at running it on Vagrant for use on Windows encountered a Ruby C Library bug :-(
 
 The [Dream Cheeky](http://www.dreamcheeky.com/) Big Red button is a USB device.
 
