@@ -37,6 +37,7 @@ class Handler
   end
 
   def push
+    `open liftoff.mp3`
     r = HTTParty.post(SCHEDULE_PIPELINE_URL, AUTH_OPTIONS)
     if r.code == 202
       puts "Pipeline scheduled."
