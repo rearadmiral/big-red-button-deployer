@@ -1,2 +1,9 @@
 ---
-????????
+deployment-pipeline:
+  name: prod-deploy
+go-server:
+  host: go.getmingle.io
+  username: rearadmiral
+upstream-pipeline:
+  name: staging-deploy
+  stage: ready_for_production
