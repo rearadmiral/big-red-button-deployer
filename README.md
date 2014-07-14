@@ -9,4 +9,8 @@ This lets you use it to trigger a [Go.CD](http://go.cd) pipeline.
 
    > bundle
 
-   >  GO_HOST=go123.thoughtworks.com PIPELINE=mingle USERNAME=rearadmiral ruby listener.rb
+   > cp config.yml{.example,}
+
+Edit your config.yml to match your usage.
+
+   > ruby main.rb
