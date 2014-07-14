@@ -37,14 +37,19 @@ class ButtonHandler
             cancel
             @cancel_requested = false
             @deploying = false
-            return
+            break
           end
         end
-        puts "deployment API request: #{@iminent_deploy_url}"
-        GoCD::Http.post(@iminent_deploy_url, @config.auth_options) do |response|
-          puts response.parsed_response
-          @deployed = true
-          `say "Go is now deploying."`
+
+        if @deploying
+          puts "deployment API request: #{@iminent_deploy_url}"
+          GoCD::Http.post(@iminent_deploy_url, @config.auth_options) do |response|
+            puts response.parsed_response
+            @deployed = true
+            `say "Go is now deploying."`
+          end
+        else
+          puts "cancelled"
         end
       rescue => e
         puts "=" * 80
