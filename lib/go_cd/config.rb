@@ -5,7 +5,7 @@ module GoCD
 
   class Config
 
-    attr_reader :auth_options, :server, :upstream_pipeline, :deployment_pipeline
+    attr_reader :auth_options, :server, :upstream_pipeline, :deployment_pipeline, :countdown_in_seconds
 
     def self.from_file(filename)
       config = YAML.load(File.read(filename))
@@ -15,10 +15,11 @@ module GoCD
     def initialize(hash)
       @config = hash
       username = @config['go-server']['username']
-      @auth_options = { username: username, password: prompt_for_password(for: username) }
       @server = OpenStruct.new(host: @config['go-server']['host'])
+      @auth_options = { username: username, password: prompt_for_password(for: "#{username}@#{@server.host}") }
       @upstream_pipeline = OpenStruct.new(name: @config['upstream-pipeline']['name'], stage: @config['upstream-pipeline']['stage'])
       @deployment_pipeline = OpenStruct.new(name: @config['deployment-pipeline']['name'])
+      @countdown_in_seconds = @config['countdown_in_seconds'] || 5
     rescue
       puts "Error loading config:"
       p @config
@@ -28,7 +29,7 @@ module GoCD
     private
 
     def prompt_for_password(opts)
-      ask("enter go password for #{opts[:for]}: ") { |prompt| prompt.echo = false }
+      ask("enter password for #{opts[:for]}: ") { |prompt| prompt.echo = false }
     end
 
   end

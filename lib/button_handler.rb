@@ -15,43 +15,70 @@ class ButtonHandler
   end
 
   def open
+    `say "please wait.  verifying upstream pipeline."`
     deployment_materials = upstream_materials
     upstream_pipeline_counter = deployment_materials[@config.upstream_pipeline.name].split('/')[1]
-    `say "about to deploy materials from #{@config.upstream_pipeline.name} #{upstream_pipeline_counter.split('').join(' ')}"`
+    `say "about to deploy version from #{@config.upstream_pipeline.name} #{upstream_pipeline_counter.split('').join(' ')}"`
     @iminent_deploy_url = deploy_url(to_params(deployment_materials))
-    puts "  will deploy => #{@iminent_deploy_url}"
-    `open dive_horn.mp3`
+    puts "  will deploy with materials: #{deployment_materials.inspect}"
   end
 
   def push
-    `open liftoff.mp3`
-    puts "deploying in 10 sec"
-    sleep 10
-    puts "deploying to #{@iminent_deploy_url}"
-    GoCD::Http.post(@iminent_deploy_url, @config.auth_options) do |response|
-      puts response.parsed_response
+    Thread.new do
+      begin
+        @deploying = true
+        puts "deploying in #{@config.countdown_in_seconds} seconds..."
+        (1..@config.countdown_in_seconds).to_a.reverse.each do |n|
+          puts n
+          `say #{n}`
+          sleep 1
+          if @cancel_requested
+            cancel
+            @cancel_requested = false
+            @deploying = false
+            return
+          end
+        end
+        puts "deployment API request: #{@iminent_deploy_url}"
+        `say "deploy!!!!"`
+        GoCD::Http.post(@iminent_deploy_url, @config.auth_options) do |response|
+          puts response.parsed_response
+          @deployed = true
+        end
+      rescue => e
+        puts "=" * 80
+        puts "Error encountered: #{e}"
+        puts e.backtrace.join("\n")
+        puts "=" * 80
+        raise
+      ensure
+        @deploying = false
+      end
     end
-    @deployed = true
   end
 
   def close
     if @deployed
       @deployed = false
       `say "Thank you for using the Big Red Button."`
-    else
-      `say "Cancelled."`
+    elsif @deploying
+      @cancel_requested = true
     end
     @iminent_deploy_url = nil
   end
 
   private
 
+  def cancel
+    `say "Cancelled."`
+  end
+
   def deploy_url(params)
     "https://#{@config.server.host}/go/api/pipelines/#{@config.deployment_pipeline.name}/schedule?#{params}"
   end
 
   def upstream_materials
-    last_green_build ||= @fetcher.fetch
+    last_green_build = @fetcher.fetch
     git_revisions = last_green_build.materials.inject({}) do |memo, git_material|
       repo_name = git_material.repository_url.split('/').last
       default_material_name = "#{repo_name}-git"
