@@ -15,7 +15,6 @@ class ButtonHandler
   end
 
   def open
-    `say "please wait.  verifying upstream pipeline."`
     deployment_materials = upstream_materials
     upstream_pipeline_counter = deployment_materials[@config.upstream_pipeline.name].split('/')[1]
     `say "about to deploy version from #{@config.upstream_pipeline.name} #{upstream_pipeline_counter.split('').join(' ')}"`
@@ -24,11 +23,13 @@ class ButtonHandler
   end
 
   def push
+    return unless @iminent_deploy_url
     Thread.new do
       begin
         @deploying = true
         puts "deploying in #{@config.countdown_in_seconds} seconds..."
-        (1..@config.countdown_in_seconds).to_a.reverse.each do |n|
+        `say "Deploying in #{@config.countdown_in_seconds}"`
+        (1..@config.countdown_in_seconds-1).to_a.reverse.each do |n|
           puts n
           `say #{n}`
           sleep 1
@@ -40,10 +41,10 @@ class ButtonHandler
           end
         end
         puts "deployment API request: #{@iminent_deploy_url}"
-        `say "deploy!!!!"`
         GoCD::Http.post(@iminent_deploy_url, @config.auth_options) do |response|
           puts response.parsed_response
           @deployed = true
+          `say "Go is now deploying."`
         end
       rescue => e
         puts "=" * 80
