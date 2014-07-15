@@ -13,9 +13,10 @@ class ButtonHandler
     @pipeline = GoCD::Pipeline.new(name: @config.deployment_pipeline.name, host: @config.server.host)
 
     if @config.upstream_pipeline
-      pipeline.use_materials_from(upstream_green_build_fetcher.fetch)
-      `say "about to deploy version from #{@pipeline.upstream_build.pipeline_name} #{@pipeline.upstream_build.pipeline_counter.to_s.split('').join(' ')}"`
+      @pipeline.use_materials_from(upstream_green_build_fetcher.fetch)
+      `say "about to deploy version from #{@pipeline.upstream_pipeline.name} #{@pipeline.upstream_pipeline.counter.to_s.split('').join(' ')}"`
       puts "about to deploy materials: {@pipeline.upstream_pipeline.inspect}"
+      puts "the url will be: #{@pipeline.schedule_url}"
     end
 
   end
