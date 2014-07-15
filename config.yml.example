@@ -9,4 +9,4 @@ go-server:
 # upstream-pipeline:
 #   name: staging-deploy
 #   stage: ready_for_production
-# countdown_in_seconds: 5 # is the default countdown, during which you can close the lid and cancel
+# countdown_in_seconds: 3 # is the default countdown, during which you can close the lid and cancel
