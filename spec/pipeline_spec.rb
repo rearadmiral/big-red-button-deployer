@@ -1,5 +1,5 @@
 require_relative '../lib/go_cd/pipeline'
-require 'go_cd/green_build'
+require 'go_cd/stage_run'
 require 'ostruct'
 
 module GoCD
@@ -18,7 +18,7 @@ module GoCD
     end
 
     let(:upstream_build) do
-      GreenBuild.new(fake_stage)
+      StageRun.new(fake_stage)
     end
 
     let(:pipeline) do
