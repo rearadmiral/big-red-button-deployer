@@ -1,12 +1,15 @@
 ---
 deployment-pipeline:
-  name: prod-deploy
+  name: deploy
+# by default it will execute the entire pipeline, but you can also have it trigger a manual gate
+  # automatic-stage: traffic_light
+  # manual-stage: deploy
 go-server:
-  host: go.getmingle.io
-  username: rearadmiral
+  host: go.your.org
+  username: osito
 # Optional Settings
 # == If you don't want the latest of all materials, you can also use the materials in the last green run of an upstream pipeline.  For example, on Mingle we want to deploy the version we validated on our staging environment.
 # upstream-pipeline:
-#   name: staging-deploy
-#   stage: ready_for_production
+  # name: deploy-staging
+  # stage: ready_for_production
 # countdown_in_seconds: 3 # is the default countdown, during which you can close the lid and cancel
