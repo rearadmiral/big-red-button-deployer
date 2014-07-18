@@ -19,7 +19,7 @@ module GoCD
         if r.code >= 200 && r.code < 400
           yield r
         elsif r.code == 409
-          raise "HTTP 409. Pipeline is probably paused."
+          raise "HTTP 4 0 9. Pipeline is paused or locked."
         else
           puts r.parsed_response
           raise "unexpected HTTP response for POST #{url}: #{r.code}"
