@@ -1,7 +1,7 @@
 require_relative 'go_cd/http'
 require_relative 'go_cd/pipeline'
+require_relative 'go_cd/stage'
 require 'go_cd/last_green_build_fetcher'
-
 
 class ButtonHandler
 
@@ -10,19 +10,27 @@ class ButtonHandler
   end
 
   def open
+
     @pipeline = GoCD::Pipeline.new(name: @config.deployment_pipeline.name, host: @config.server.host)
 
-    if @config.upstream_pipeline
+    if @config.deployment_pipeline.manual_stage && @config.upstream_pipeline
+      existing_stage_run = existing_pipeline_fetcher.fetch || raise("could not find existing stage with the materials specified")
+      @stage = GoCD::Stage.new(pipeline_counter: existing_stage_run.pipeline_counter, name: @config.deployment_pipeline.manual_stage, pipeline_name: @config.deployment_pipeline.name, host: @config.server.host)
+      `say "about to trigger #{@stage.name} stage of #{@stage.pipeline_name}, number #{@stage.pipeline_counter.to_s.split('').join(' ')}"`
+      puts "about to trigger #{@stage.inspect}"
+    elsif @config.upstream_pipeline
       @pipeline.use_materials_from(upstream_green_build_fetcher.fetch)
-      `say "about to deploy version from #{@pipeline.upstream_pipeline.name} #{@pipeline.upstream_pipeline.counter.to_s.split('').join(' ')}"`
-      puts "about to deploy materials: {@pipeline.upstream_pipeline.inspect}"
-      puts "the url will be: #{@pipeline.schedule_url}"
+      `say "about to schedule pipeline with the same materials as #{@pipeline.upstream_pipeline.name} #{@pipeline.upstream_pipeline.counter.to_s.split('').join(' ')}"`
+      puts "deploying pipeline with materials: #{@pipeline.upstream_pipeline.inspect}"
     end
 
+    @url = @stage ? @stage.trigger_url : @pipeline.schedule_url
+    @url.tap { |url| puts "will post to: #{url}" }
   end
 
+
   def push
-    return unless @pipeline
+    return unless @url
     Thread.new do
       begin
         @deploying = true
@@ -42,9 +50,10 @@ class ButtonHandler
 
         if @deploying
           puts "deployment API request: #{@pipeline.schedule_url}"
-          GoCD::Http.post(@pipeline.schedule_url, @config.auth_options) do |response|
-            puts response.parsed_response
+          GoCD::Http.post(@url, @config.auth_options) do |response|
+            puts "HTTP #{response.code}: #{response.parsed_response}"
             @deployed = true
+            puts "Go has scheduled the deploy"
             `say "Go is now deploying."`
           end
         else
@@ -80,8 +89,19 @@ class ButtonHandler
     `say "Cancelled."`
   end
 
+  def existing_pipeline_fetcher
+    @existing_pipeline_fetcher ||= GoCD::LastGreenBuildFetcher.new(:protocol => 'https',
+                                                 :host => @config.server.host,
+                                                 :port => 443,
+                                                 :username => @config.auth_options[:username],
+                                                 :password => @config.auth_options[:password],
+                                                 :pipeline_name => @config.deployment_pipeline.name,
+                                                 :stage_name => @config.deployment_pipeline.automatic_stage)
+
+  end
+
   def upstream_green_build_fetcher
-    @fupstream_green_build_fetcher ||= GoCD::LastGreenBuildFetcher.new(:protocol => 'https',
+    @upstream_green_build_fetcher ||= GoCD::LastGreenBuildFetcher.new(:protocol => 'https',
                                                  :host => @config.server.host,
                                                  :port => 443,
                                                  :username => @config.auth_options[:username],

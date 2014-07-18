@@ -17,8 +17,8 @@ module GoCD
       username = @config['go-server']['username']
       @server = OpenStruct.new(host: @config['go-server']['host'])
       @auth_options = { username: username, password: prompt_for_password(for: "#{username}@#{@server.host}") }
-      @upstream_pipeline = OpenStruct.new(name: @config['upstream-pipeline']['name'], stage: @config['upstream-pipeline']['stage']) if @config['upstream-pipeline']
-      @deployment_pipeline = OpenStruct.new(name: @config['deployment-pipeline']['name'])
+      @upstream_pipeline = OpenStruct.new(name: @config['upstream-pipeline']['name']) if @config['upstream-pipeline']
+      @deployment_pipeline = OpenStruct.new(name: @config['deployment-pipeline']['name'], automatic_stage: @config['deployment-pipeline']['automatic-stage'], manual_stage: @config['deployment-pipeline']['manual-stage'])
       @countdown_in_seconds = @config['countdown_in_seconds'] || 3
     rescue
       puts "Error loading config:"

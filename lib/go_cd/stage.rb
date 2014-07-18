@@ -2,6 +2,8 @@ module GoCD
 
   class Stage
 
+    attr_reader :name, :pipeline_name, :pipeline_counter
+
     def initialize(options)
       @host = options[:host]
       @name = options[:name]
