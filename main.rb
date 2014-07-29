@@ -1,10 +1,6 @@
-require 'rubygems'
-require 'bundler'
 require_relative 'lib/listener'
 require_relative 'lib/go_cd/config'
 require_relative 'lib/go_cd/http'
-
-Bundler.setup
 
 config = GoCD::Config.from_file('./config.yml')
 
